@@ -48,36 +48,36 @@ func analysis(filename string) (Result, error) {
 	ext := filepath.Ext(filename)
 	trimExt := strings.TrimSuffix(filename, ext)
 
-	// タイムスタンプ削除
-	pattern := `(?:\d+_){2}`
-	re := regexp.MustCompile(pattern)
-	if !re.MatchString(trimExt) {
-		return Result{}, errors.New("リザルトじゃないからスルーしますの")
+	// Extract timestamp
+	timestamp, str, err := extractPattern(trimExt, `(?:\d+_){2}`)
+	if err != nil {
+		return Result{}, err
 	}
-	matches := re.FindAllStringSubmatch(trimExt, -1)
-	timestamp := matches[0][0]
-	str := re.ReplaceAllString(trimExt, "")
-	// RANK
-	pattern = `\s[ABCDEF]+$`
-	re = regexp.MustCompile(pattern)
-	if !re.MatchString(str) {
-		return Result{}, errors.New("リザルトじゃないからスルーしますの")
+
+	// Extract rank
+	rank, str, err := extractPattern(str, `\s[ABCDEF]+$`)
+	if err != nil {
+		return Result{}, err
 	}
-	matches = re.FindAllStringSubmatch(str, -1)
-	rank := matches[0][0]
-	str = re.ReplaceAllString(str, "")
-	// Clear type
-	pattern = `PERFECT|FULL\sCOMBO|LIGHT\sASSIST\sEASY\sCLEAR|EXHARD\sCLEAR|HARD\sCLEAR|EASY\sCLEAR|FAILED|CLEAR$`
-	re = regexp.MustCompile(pattern)
-	if !re.MatchString(str) {
-		return Result{}, errors.New("リザルトじゃないからスルーしますの")
+
+	// Extract clear type
+	clearType, title, err := extractPattern(str, `PERFECT|FULL\sCOMBO|LIGHT\sASSIST\sEASY\sCLEAR|EXHARD\sCLEAR|HARD\sCLEAR|EASY\sCLEAR|FAILED|CLEAR$`)
+	if err != nil {
+		return Result{}, err
 	}
-	matches = re.FindAllStringSubmatch(str, -1)
-	clearType := matches[0][0]
-	title := re.ReplaceAllString(str, "")
-	fmt.Println(title)
 
 	return Result{strings.TrimSpace(title), strings.TrimSpace(rank), clearType, timestamp}, nil
+}
+
+func extractPattern(input, pattern string) (string, string, error) {
+	re := regexp.MustCompile(pattern)
+	if !re.MatchString(input) {
+		return "", "", errors.New("not a valid result file")
+	}
+	matches := re.FindAllStringSubmatch(input, -1)
+	matchedString := matches[0][0]
+	remainingString := re.ReplaceAllString(input, "")
+	return matchedString, remainingString, nil
 }
 
 func notify(config Config, eventName string) {
