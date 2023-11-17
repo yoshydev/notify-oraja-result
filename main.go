@@ -67,7 +67,7 @@ func analysis(filename string) (Result, error) {
 	rank := matches[0][0]
 	str = re.ReplaceAllString(str, "")
 	// Clear type
-	pattern = `ASSISTED\sEASY\sCLEAR|EXHARD\sCLEAR|HARD\sCLEAR|EASY\sCLEAR|FAILED|CLEAR$`
+	pattern = `PERFECT|FULL\sCOMBO|LIGHT\sASSIST\sEASY\sCLEAR|EXHARD\sCLEAR|HARD\sCLEAR|EASY\sCLEAR|FAILED|CLEAR$`
 	re = regexp.MustCompile(pattern)
 	if !re.MatchString(str) {
 		return Result{}, errors.New("リザルトじゃないからスルーしますの")
@@ -77,7 +77,7 @@ func analysis(filename string) (Result, error) {
 	title := re.ReplaceAllString(str, "")
 	fmt.Println(title)
 
-	return Result{strings.TrimSpace(title), strings.TrimSpace(rank), clearType, timestamp}, errors.New("")
+	return Result{strings.TrimSpace(title), strings.TrimSpace(rank), clearType, timestamp}, nil
 }
 
 func notify(config Config, eventName string) {
