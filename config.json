@@ -1,0 +1,5 @@
+{
+  "username": "user name",
+  "webhook": "https://discord.com/api/webhooks/xxxxx",
+  "watch_path": "."
+}
